@@ -3,8 +3,8 @@ import requests
 
 st.set_page_config(page_title="SecondBrain", layout="centered")
 
-st.title("🧠 SecondBrain")
-st.write("Ask questions from your personal knowledge base")
+st.title("SecondBrain")
+st.write("Ask questions from your knowledge base")
 
 query = st.text_input("Enter your question:")
 

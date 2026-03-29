@@ -1,22 +1,37 @@
 import faiss
 import pickle
+import numpy as np
 from sentence_transformers import SentenceTransformer
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = None
+def get_model():
+    global model
+    if model is None:
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+    return model
 
-INDEX_FILE = "vector_db/index.faiss"
-META_FILE = "vector_db/meta.pkl"
+index_path = "vector_db/index.faiss"
+meta_path = "vector_db/meta.pkl"
+
 
 def search(query, k=3):
-    index = faiss.read_index(INDEX_FILE)
-    meta = pickle.load(open(META_FILE, "rb"))
+    index = faiss.read_index(index_path)
 
-    q_emb = model.encode([query])
-    distances, indices = index.search(q_emb, k)
+    with open(meta_path, "rb") as f:
+        meta = pickle.load(f)
+
+    query_vector = get_model().encode([query])
+
+    distances, indices = index.search(np.array(query_vector), k)
 
     results = []
+    seen = set()
+
     for i in indices[0]:
         if i < len(meta):
-            results.append(meta[i])
+            text = meta[i]
+            if text not in seen:
+                results.append(text)
+                seen.add(text)
 
     return results
